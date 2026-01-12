@@ -76,17 +76,32 @@ graph export "pstplonl_comparison_by_age.png", replace
 * Coefficient plot comparing models
 *------------------------------------------------------------------------------
 
-* Standardize variables
+* Standardize variables (check if already exist from hypothesis_testing.do)
 foreach var of varlist nwspol pstplonl age {
-    quietly egen z_`var' = std(`var')
+    capture confirm variable z_`var'
+    if _rc != 0 {
+        quietly egen z_`var' = std(`var')
+    }
 }
 
-* Estimate models
-quietly reg vote c.z_nwspol c.z_pstplonl c.z_age
-estimates store vote_std
+* Estimate models (or use stored estimates if available from hypothesis_testing.do)
+capture estimates restore vote_lpm_base
+if _rc != 0 {
+    quietly reg vote c.z_nwspol c.z_pstplonl c.z_age
+    estimates store vote_std
+}
+else {
+    estimates store vote_std
+}
 
-quietly reg ac_index c.z_nwspol c.z_pstplonl c.z_age
-estimates store ac_std
+capture estimates restore ac_lpm_base
+if _rc != 0 {
+    quietly reg ac_index c.z_nwspol c.z_pstplonl c.z_age
+    estimates store ac_std
+}
+else {
+    estimates store ac_std
+}
 
 * Create coefficient plot
 coefplot vote_std ac_std, ///
@@ -102,11 +117,24 @@ graph export "coefficients_comparison.png", replace
 * Coefficient plot with interactions
 *------------------------------------------------------------------------------
 
-quietly reg vote c.z_nwspol##c.z_age c.z_pstplonl##c.z_age
-estimates store vote_int
+* Use stored estimates if available, otherwise re-estimate
+capture estimates restore vote_lpm_interact
+if _rc != 0 {
+    quietly reg vote c.z_nwspol##c.z_age c.z_pstplonl##c.z_age
+    estimates store vote_int
+}
+else {
+    estimates store vote_int
+}
 
-quietly reg ac_index c.z_nwspol##c.z_age c.z_pstplonl##c.z_age
-estimates store ac_int
+capture estimates restore ac_lpm_interact
+if _rc != 0 {
+    quietly reg ac_index c.z_nwspol##c.z_age c.z_pstplonl##c.z_age
+    estimates store ac_int
+}
+else {
+    estimates store ac_int
+}
 
 coefplot vote_int ac_int, ///
     keep(z_nwspol z_pstplonl c.z_nwspol#c.z_age c.z_pstplonl#c.z_age) ///
@@ -209,12 +237,24 @@ graph export "ac_index_by_vote.png", replace
 * Create a summary plot showing key comparisons
 *------------------------------------------------------------------------------
 
-* Extract standardized coefficients
-quietly reg vote c.z_nwspol c.z_pstplonl c.z_age
-matrix vote_coef = e(b)
+* Extract standardized coefficients (reuse stored estimates if available)
+capture estimates restore vote_std
+if _rc == 0 {
+    matrix vote_coef = e(b)
+}
+else {
+    quietly reg vote c.z_nwspol c.z_pstplonl c.z_age
+    matrix vote_coef = e(b)
+}
 
-quietly reg ac_index c.z_nwspol c.z_pstplonl c.z_age  
-matrix ac_coef = e(b)
+capture estimates restore ac_std
+if _rc == 0 {
+    matrix ac_coef = e(b)
+}
+else {
+    quietly reg ac_index c.z_nwspol c.z_pstplonl c.z_age  
+    matrix ac_coef = e(b)
+}
 
 * Create custom comparison plot
 preserve

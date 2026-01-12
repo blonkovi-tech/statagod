@@ -214,8 +214,9 @@ test c.pstplonl#c.age
   3. Compare standardized coefficients
 ==============================================================================*/
 
-* Standardize continuous variables
+* Standardize continuous variables (check if already exist to allow re-running)
 foreach var of varlist nwspol pstplonl age {
+    capture drop z_`var'
     egen z_`var' = std(`var')
 }
 

@@ -33,10 +33,12 @@ for file in "${files[@]}"; do
         echo "  WARNING: Unmatched braces (${open_braces} open, ${close_braces} close)"
     fi
     
-    # Check for unmatched quotes (basic check)
+    # Check for unmatched quotes (basic check - limited accuracy)
+    # Note: This is a simplified check that may produce false positives for
+    # escaped quotes or quotes within comments. For thorough validation, run in Stata.
     quote_count=$(grep -o '"' "$file" | wc -l)
     if [ $((quote_count % 2)) != 0 ]; then
-        echo "  WARNING: Odd number of quotes ($quote_count) - possible unmatched quote"
+        echo "  INFO: Odd number of quotes ($quote_count) - may indicate unmatched quote (or escaped quotes)"
     fi
     
     # Check for common Stata commands are present
