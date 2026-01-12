@@ -1,0 +1,34 @@
+# Stata output files
+*.log
+*.smcl
+
+# Stata temporary files
+*.gph
+
+# Generated data files
+example_data.dta
+*_temp.dta
+
+# Generated graphics
+*.png
+*.eps
+*.pdf
+*.svg
+
+# Stata system files
+*.stpr
+*.ster
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Backup files
+*~
+*.bak
+*.backup
